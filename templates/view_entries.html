@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Entries</title>
+</head>
+<body>
+
+<h2>Your Diary Entries</h2>
+
+{% for entry in entries %}
+    <h3>{{ entry[1] }}</h3>
+    <p>{{ entry[2] }}</p>
+
+    <a href="/edit/{{ entry[0] }}">Edit</a> |
+    <a href="/delete/{{ entry[0] }}">Delete</a>
+
+    <hr>
+{% endfor %}
+
+</body>
+</html>
