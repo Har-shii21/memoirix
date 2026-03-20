@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -20,7 +21,8 @@ def init_db():
     CREATE TABLE IF NOT EXISTS entries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
-        content TEXT
+        content TEXT,
+        date TEXT    
     )
     ''')
 
@@ -80,12 +82,13 @@ def add_entry():
     if request.method == 'POST':
         title = request.form['title']
         content = request.form['content']
+        date = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO entries (title, content) VALUES (?, ?)",
-                       (title, content))
+        cursor.execute("INSERT INTO entries (title, content, date) VALUES (?, ?, ?)",
+                       (title, content, date))
 
         conn.commit()
         conn.close()
@@ -96,12 +99,17 @@ def add_entry():
 
 @app.route('/view')
 def view_entries():
+    search_date = request.args.get('search_date')
+
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM entries")
-    entries = cursor.fetchall()
+    if search_date:
+        cursor.execute("SELECT * FROM entries WHERE date LIKE ?", ('%' + search_date + '%',))
+    else:
+        cursor.execute("SELECT * FROM entries")
 
+    entries = cursor.fetchall()
     conn.close()
 
     return render_template('view_entries.html', entries=entries)

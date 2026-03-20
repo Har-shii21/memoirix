@@ -3,16 +3,26 @@
 <head>
     <title>Edit Entry</title>
 </head>
-<body>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<body class="light">
+
+<button onclick="toggleMode()">Toggle Dark Mode</button>
 
 <h2>Edit Entry</h2>
 
-<form method="POST">
-    Title: <input type="text" name="title" value="{{ entry[1] }}"><br><br>
-    Content: <textarea name="content">{{ entry[2] }}</textarea><br><br>
+<div class="card">
+    <form method="POST">
+        <input type="text" name="title" value="{{ entry[1] }}"><br><br>
+        <textarea name="content">{{ entry[2] }}</textarea><br><br>
+        <button type="submit" class="btn">Update</button>
+    </form>
+</div>
 
-    <button type="submit">Update</button>
-</form>
+<script>
+function toggleMode() {
+    document.body.classList.toggle("dark");
+}
+</script>
 
 </body>
 </html>

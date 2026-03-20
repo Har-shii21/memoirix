@@ -3,7 +3,9 @@
 <head>
     <title>Login</title>
 </head>
-<body>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<body class="light">
+<button onclick="toggleMode()">Toggle Dark Mode</button>
 
 <h2>Login</h2>
 
@@ -13,6 +15,10 @@
 
     <button type="submit">Login</button>
 </form>
-
+<script>
+function toggleMode() {
+    document.body.classList.toggle("dark");
+}
+</script>
 </body>
 </html>
