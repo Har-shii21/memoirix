@@ -113,3 +113,17 @@ input, textarea {
     border-radius: 5px;
     border: 1px solid #ccc;
 }
+
+
+body {
+    color: white;
+}
+
+h1, h2, h3, p, label {
+    color: white;
+}
+
+a {
+    color: #ddd;
+}
+

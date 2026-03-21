@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>View Entries</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <body class="light">
@@ -9,6 +11,24 @@
 
 <h2>Your Diary Entries</h2>
 
+<div style="display:flex; gap:20px;">
+
+    <!-- Mood Summary -->
+    <div class="card" style="width:40%;">
+        <h3>Mood Summary 📊</h3>
+        <p>😄 Happy: {{ mood_count["Happy"] }}</p>
+        <p>😢 Sad: {{ mood_count["Sad"] }}</p>
+        <p>😡 Angry: {{ mood_count["Angry"] }}</p>
+        <p>🤩 Excited: {{ mood_count["Excited"] }}</p>
+        <p>😐 Normal: {{ mood_count["Normal"] }}</p>
+    </div>
+
+    <!-- Chart -->
+    <div class="card" style="width:60%;">
+        <canvas id="moodChart"></canvas>
+    </div>
+
+</div>
 <form method="GET">
     <input type="text" name="search_date" placeholder="Enter date (DD-MM-YYYY)">
     <button type="submit" class="btn">Search</button>
@@ -21,6 +41,17 @@
 <div class="card">
     <h3>{{ entry[1] }}</h3>
     <p>{{ entry[2] }}</p>
+    <p><b>{% if entry[4] == 'Happy' %}
+    😄 Happy
+{% elif entry[4] == 'Sad' %}
+    😢 Sad
+{% elif entry[4] == 'Angry' %}
+    😡 Angry
+{% elif entry[4] == 'Excited' %}
+    🤩 Excited
+{% else %}
+    😐 Normal
+{% endif %}</p>
     <small>{{ entry[3] }}</small>
 
     <a href="/edit/{{ entry[0] }}" class="btn">Edit</a>
@@ -40,6 +71,60 @@ function toggleMode() {
     document.body.classList.toggle("dark");
 }
 </script>
+<script>
+window.onload = function() {
+    const ctx = document.getElementById('moodChart');
 
+    if (!ctx) {
+        console.log("Canvas not found");
+        return;
+    }
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Happy', 'Sad', 'Angry', 'Excited', 'Normal'],
+            datasets: [{
+                label: 'Mood Count',
+                data: [
+                    {{ mood_count["Happy"] }},
+                    {{ mood_count["Sad"] }},
+                    {{ mood_count["Angry"] }},
+                    {{ mood_count["Excited"] }},
+                    {{ mood_count["Normal"] }}
+                ],
+                backgroundColor: 'rgba(255,255,255,0.7)'
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.2)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.2)'
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
 </body>
 </html>

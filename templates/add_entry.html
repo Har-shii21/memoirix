@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Add Entry</title>
 </head>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -14,6 +15,13 @@
     <form method="POST">
         <input type="text" name="title" placeholder="Enter title"><br><br>
         <textarea name="content" placeholder="Write your thoughts..."></textarea><br><br>
+        <select name="mood">
+    <option value="Happy">😄 Happy</option>
+    <option value="Sad">😢 Sad</option>
+    <option value="Angry">😡 Angry</option>
+    <option value="Excited">🤩 Excited</option>
+    <option value="Normal">😐 Normal</option>
+</select><br><br>
         <button type="submit" class="btn">Save</button>
     </form>
 </div>

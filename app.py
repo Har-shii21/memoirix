@@ -18,13 +18,14 @@ def init_db():
     )
     ''')
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS entries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        content TEXT,
-        date TEXT    
-    )
-    ''')
+CREATE TABLE IF NOT EXISTS entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    content TEXT,
+    date TEXT,
+    mood TEXT
+)
+''')
 
     conn.commit()
     conn.close()
@@ -82,13 +83,14 @@ def add_entry():
     if request.method == 'POST':
         title = request.form['title']
         content = request.form['content']
+        mood = request.form['mood']
         date = datetime.now().strftime("%d-%m-%Y %H:%M")
 
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO entries (title, content, date) VALUES (?, ?, ?)",
-                       (title, content, date))
+        cursor.execute("INSERT INTO entries (title, content, date, mood) VALUES (?, ?, ?, ?)",
+                       (title, content, date, mood))
 
         conn.commit()
         conn.close()
@@ -110,9 +112,24 @@ def view_entries():
         cursor.execute("SELECT * FROM entries")
 
     entries = cursor.fetchall()
+
+    # 🔥 Mood count logic
+    mood_count = {
+        "Happy": 0,
+        "Sad": 0,
+        "Angry": 0,
+        "Excited": 0,
+        "Normal": 0
+    }
+
+    for entry in entries:
+        mood = entry[4]
+        if mood in mood_count:
+            mood_count[mood] += 1
+
     conn.close()
 
-    return render_template('view_entries.html', entries=entries)
+    return render_template('view_entries.html', entries=entries, mood_count=mood_count)
 
 @app.route('/delete/<int:id>')
 def delete_entry(id):
