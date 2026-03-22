@@ -80,6 +80,10 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
 @app.route('/add', methods=['GET', 'POST'])
 def add_entry():
     if request.method == 'POST':
