@@ -32,9 +32,11 @@ CREATE TABLE IF NOT EXISTS entries (
 
 init_db()
 
+from flask import redirect
+
 @app.route('/')
 def home():
-    return "Home Working!"
+    return redirect('/login')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
