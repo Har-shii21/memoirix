@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Change this to a random secret key
 
 # Create database and table
 def init_db():
@@ -32,8 +33,6 @@ CREATE TABLE IF NOT EXISTS entries (
 
 init_db()
 
-from flask import redirect
-
 @app.route('/')
 def home():
     return redirect('/login')
@@ -55,7 +54,7 @@ def register():
         conn.commit()
         conn.close()
 
-        return "User Registered Successfully!"
+        return redirect('/login')
 
     return render_template('register.html')
 
@@ -74,7 +73,8 @@ def login():
         conn.close()
 
         if user:
-            return render_template('dashboard.html')
+            session['user_id'] = user[0]
+            return redirect('/dashboard')
         else:
             return "Invalid Email or Password!"
 
@@ -91,8 +91,8 @@ def add_entry():
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO entries (title, content, date, mood) VALUES (?, ?, ?, ?)",
-                       (title, content, date, mood))
+        cursor.execute("INSERT INTO entries (user_id, title, content, date, mood) VALUES (?, ?, ?, ?, ?)",
+                       (session['user_id'], title, content, date, mood))
 
         conn.commit()
         conn.close()
@@ -109,11 +109,11 @@ def view_entries():
     cursor = conn.cursor()
 
     if search_date:
-        cursor.execute("SELECT * FROM entries WHERE date LIKE ?", ('%' + search_date + '%',))
+        cursor.execute("SELECT * FROM entries WHERE user_id = ? AND date LIKE ?", (session['user_id'], '%' + search_date + '%')).fetchall()
     else:
-        cursor.execute("SELECT * FROM entries")
+        cursor.execute("SELECT * FROM entries WHERE user_id=?", (session['user_id'],)).fetchall()
 
-    entries = cursor.fetchall()
+    entries = cursor.execute("SELECT * FROM entries WHERE user_id = ?", (session['user_id'],)).fetchall()
 
     # 🔥 Mood count logic
     mood_count = {
