@@ -82,6 +82,8 @@ def login():
 
 @app.route('/dashboard')
 def dashboard():
+    if 'user_id' not in session:
+        return redirect('/login')
     return render_template('dashboard.html')
 
 @app.route('/add', methods=['GET', 'POST'])
