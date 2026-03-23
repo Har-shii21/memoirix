@@ -132,9 +132,8 @@ def view_entries():
     }
 
     for entry in entries:
-        mood = entry[4]
-        if mood in mood_count:
-            mood_count[mood] += 1
+        mood = entry[5]
+        mood_count[mood] = mood_count.get(mood, 0) + 1
 
     conn.close()
 

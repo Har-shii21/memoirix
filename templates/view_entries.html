@@ -39,20 +39,20 @@
 
 {% for entry in entries %}
 <div class="card">
-    <h3>{{ entry[1] }}</h3>
-    <p>{{ entry[2] }}</p>
-    <p><b>{% if entry[4] == 'Happy' %}
+    <h3>{{ entry[2] }}</h3>
+    <p>{{ entry[3] }}</p>
+    <p><b>{% if entry[5] == 'Happy' %}
     😄 Happy
-{% elif entry[4] == 'Sad' %}
+{% elif entry[5] == 'Sad' %}
     😢 Sad
-{% elif entry[4] == 'Angry' %}
+{% elif entry[5] == 'Angry' %}
     😡 Angry
-{% elif entry[4] == 'Excited' %}
+{% elif entry[5] == 'Excited' %}
     🤩 Excited
 {% else %}
     😐 Normal
 {% endif %}</p>
-    <small>{{ entry[3] }}</small>
+    <small>{{ entry[4] }}</small>
 
     <a href="/edit/{{ entry[0] }}" class="btn">Edit</a>
     <a href="/delete/{{ entry[0] }}" class="btn delete">Delete</a>
@@ -87,11 +87,11 @@ window.onload = function() {
             datasets: [{
                 label: 'Mood Count',
                 data: [
-                    {{ mood_count["Happy"] }},
-                    {{ mood_count["Sad"] }},
-                    {{ mood_count["Angry"] }},
-                    {{ mood_count["Excited"] }},
-                    {{ mood_count["Normal"] }}
+                    {{ mood_count.get("Happy", 0) }},
+                    {{ mood_count.get("Sad", 0) }},
+                    {{ mood_count.get("Angry", 0) }},
+                    {{ mood_count.get("Excited", 0) }},
+                    {{ mood_count.get("Normal", 0) }}
                 ],
                 backgroundColor: 'rgba(255,255,255,0.7)'
             }]
