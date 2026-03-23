@@ -10,15 +10,15 @@ def init_db():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    cursor.execute('''
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
+        username TEXT,
         email TEXT,
         password TEXT
     )
-    ''')
-    cursor.execute('''
+    """)
+    cursor.execute("""
 CREATE TABLE IF NOT EXISTS entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS entries (
     date TEXT,
     mood TEXT
 )
-''')
+""")
 
     conn.commit()
     conn.close()
@@ -99,7 +99,7 @@ def add_entry():
         cursor = conn.cursor()
 
         cursor.execute("INSERT INTO entries (user_id, title, content, date, mood) VALUES (?, ?, ?, ?, ?)",
-                       (session['user_id'], title, content, date, mood))
+                       (session.get('user_id'), title, content, date, mood))
 
         conn.commit()
         conn.close()
@@ -116,11 +116,11 @@ def view_entries():
     cursor = conn.cursor()
 
     if search_date:
-        cursor.execute("SELECT * FROM entries WHERE user_id = ? AND date LIKE ?", (session['user_id'], '%' + search_date + '%')).fetchall()
+        cursor.execute("SELECT * FROM entries WHERE user_id = ? AND date LIKE ?", (session.get('user_id'), '%' + search_date + '%')).fetchall()
     else:
-        cursor.execute("SELECT * FROM entries WHERE user_id=?", (session['user_id'],)).fetchall()
+        cursor.execute("SELECT * FROM entries WHERE user_id = ?", (session.get('user_id'),)).fetchall()
 
-    entries = cursor.execute("SELECT * FROM entries WHERE user_id = ?", (session['user_id'],)).fetchall()
+    entries = cursor.execute("SELECT * FROM entries WHERE user_id = ?", (session.get('user_id'),)).fetchall()
 
     # 🔥 Mood count logic
     mood_count = {
