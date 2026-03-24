@@ -121,7 +121,7 @@ def view_entries():
     else:
         cursor.execute("SELECT * FROM entries WHERE user_id = %s", (session.get('user_id'),))
 
-    entries = cursor.execute("SELECT * FROM entries WHERE user_id = %", (session.get('user_id'),)).fetchall()
+    entries = cursor.execute("SELECT * FROM entries WHERE user_id = %s", (session.get('user_id'),)).fetchall()
 
     # 🔥 Mood count logic
     mood_count = {
