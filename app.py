@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
+import os
+import psycopg2
 from datetime import datetime
 
 app = Flask(__name__)
@@ -7,7 +8,7 @@ app.secret_key = 'your_secret_key'  # Change this to a random secret key
 
 # Create database and table
 def init_db():
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -41,16 +42,16 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
+        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
 
         # SAVE DATA INTO DATABASE
-        conn = sqlite3.connect('database.db')
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-                       (name, email, password))
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+                       (username.strip(), email.strip(), password.strip()))
 
         conn.commit()
         conn.close()
@@ -62,13 +63,13 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form['email'].strip()
+        password = request.form['password'].strip()
 
-        conn = sqlite3.connect('database.db')
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
+        cursor.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email, password))
         user = cursor.fetchone()
 
         conn.close()
@@ -95,10 +96,10 @@ def add_entry():
         mood = request.form['mood']
         date = datetime.now().strftime("%d-%m-%Y %H:%M")
 
-        conn = sqlite3.connect('database.db')
+        conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO entries (user_id, title, content, date, mood) VALUES (?, ?, ?, ?, ?)",
+        cursor.execute("INSERT INTO entries (user_id, title, content, date, mood) VALUES (%s, %s, %s, %s, %s)",
                        (session.get('user_id'), title, content, date, mood))
 
         conn.commit()
@@ -112,15 +113,15 @@ def add_entry():
 def view_entries():
     search_date = request.args.get('search_date')
 
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     cursor = conn.cursor()
 
     if search_date:
-        cursor.execute("SELECT * FROM entries WHERE user_id = ? AND date LIKE ?", (session.get('user_id'), '%' + search_date + '%')).fetchall()
+        cursor.execute("SELECT * FROM entries WHERE user_id = %s AND date LIKE %s", (session.get('user_id'), '%' + search_date + '%'))
     else:
-        cursor.execute("SELECT * FROM entries WHERE user_id = ?", (session.get('user_id'),)).fetchall()
+        cursor.execute("SELECT * FROM entries WHERE user_id = %s", (session.get('user_id'),))
 
-    entries = cursor.execute("SELECT * FROM entries WHERE user_id = ?", (session.get('user_id'),)).fetchall()
+    entries = cursor.execute("SELECT * FROM entries WHERE user_id = %", (session.get('user_id'),)).fetchall()
 
     # 🔥 Mood count logic
     mood_count = {
@@ -141,10 +142,10 @@ def view_entries():
 
 @app.route('/delete/<int:id>')
 def delete_entry(id):
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM entries WHERE id=?", (id,))
+    cursor.execute("DELETE FROM entries WHERE id=%s", (id,))
 
     conn.commit()
     conn.close()
@@ -153,14 +154,14 @@ def delete_entry(id):
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_entry(id):
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     cursor = conn.cursor()
 
     if request.method == 'POST':
         title = request.form['title']
         content = request.form['content']
 
-        cursor.execute("UPDATE entries SET title=?, content=? WHERE id=?",
+        cursor.execute("UPDATE entries SET title=%s, content=%s WHERE id=%s",
                        (title, content, id))
 
         conn.commit()
@@ -168,7 +169,7 @@ def edit_entry(id):
 
         return "Entry Updated Successfully!"
 
-    cursor.execute("SELECT * FROM entries WHERE id=?", (id,))
+    cursor.execute("SELECT * FROM entries WHERE id=%s", (id,))
     entry = cursor.fetchone()
     conn.close()
 
