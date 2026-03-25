@@ -109,37 +109,46 @@ def add_entry():
 
     return render_template('add_entry.html')
 
+import os
+import psycopg2
+
 @app.route('/view')
 def view_entries():
-    search_date = request.args.get('search_date')
+    if 'user_id' not in session:
+        return redirect('/login')
 
-    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
-    cursor = conn.cursor()
+    try:
+        conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+        cursor = conn.cursor()
 
-    if search_date:
-        cursor.execute("SELECT * FROM entries WHERE user_id = %s AND date LIKE %s", (session.get('user_id'), '%' + search_date + '%'))
-    else:
-        cursor.execute("SELECT * FROM entries WHERE user_id = %s", (session.get('user_id'),))
+        cursor.execute(
+            "SELECT * FROM entries WHERE user_id=%s",
+            (session['user_id'],)
+        )
+        entries = cursor.fetchall()
 
-    entries = cursor.execute("SELECT * FROM entries WHERE user_id = %s", (session.get('user_id'),)).fetchall()
+        mood_count = {
+            "Happy": 0,
+            "Sad": 0,
+            "Angry": 0,
+            "Excited": 0,
+            "Normal": 0
+        }
 
-    # 🔥 Mood count logic
-    mood_count = {
-        "Happy": 0,
-        "Sad": 0,
-        "Angry": 0,
-        "Excited": 0,
-        "Normal": 0
-    }
+        for entry in entries:
+            mood = entry[5]
+            if mood in mood_count:
+                mood_count[mood] += 1
 
-    for entry in entries:
-        mood = entry[5]
-        mood_count[mood] = mood_count.get(mood, 0) + 1
+        cursor.close()
+        conn.close()
 
-    conn.close()
+        return render_template("view.html", entries=entries, mood_count=mood_count)
 
-    return render_template('view_entries.html', entries=entries, mood_count=mood_count)
-
+    except Exception as e:
+        print("ERROR:", e)
+        return "Something went wrong"
+    
 @app.route('/delete/<int:id>')
 def delete_entry(id):
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
