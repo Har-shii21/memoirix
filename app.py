@@ -131,8 +131,8 @@ def view_entries():
             search_date = f"{parts[2]}-{parts[1]}-{parts[0]}"
 
             cursor.execute(
-                "SELECT * FROM entries WHERE user_id=%s AND date=%s",
-                (session['user_id'], search_date)
+                "SELECT * FROM entries WHERE user_id=%s AND date LIKE %s",
+                (session['user_id'], f"%{search_date}%")
             )
         else:
             cursor.execute(
