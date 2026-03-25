@@ -121,12 +121,24 @@ def view_entries():
         conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cursor = conn.cursor()
 
-        cursor.execute(
-            "SELECT * FROM entries WHERE user_id=%s",
-            (session['user_id'],)
-        )
+        # 🔍 GET SEARCH VALUE
+        search_date = request.args.get("search_date")
+
+        # 🔍 APPLY SEARCH
+        if search_date:
+            cursor.execute(
+                "SELECT * FROM entries WHERE user_id=%s AND date=%s",
+                (session['user_id'], search_date)
+            )
+        else:
+            cursor.execute(
+                "SELECT * FROM entries WHERE user_id=%s",
+                (session['user_id'],)
+            )
+
         entries = cursor.fetchall()
 
+        # 📊 MOOD COUNT
         mood_count = {
             "Happy": 0,
             "Sad": 0,
@@ -136,20 +148,18 @@ def view_entries():
         }
 
         for entry in entries:
-            try:
-                mood = entry[5]
-            except:
-                mood = "Normal"
-            if not mood:
-                mood = "Normal"
-
+            mood = entry[5] if entry[5] else "Normal"
             if mood in mood_count:
                 mood_count[mood] += 1
 
         cursor.close()
         conn.close()
 
-        return render_template("view_entries.html", entries=entries, mood_count=mood_count)
+        return render_template(
+            "view_entries.html",
+            entries=entries,
+            mood_count=mood_count
+        )
 
     except Exception as e:
         return str(e)
