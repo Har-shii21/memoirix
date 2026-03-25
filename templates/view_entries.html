@@ -42,13 +42,15 @@
     <h3>{{ entry[2] }}</h3>
     <p>{{ entry[3] }}</p>
 <p><b>
-{% if entry[5] == 'Happy' %}
+{% set mood = entry[5] if entry|length > 5 else 'Normal' %}
+
+{% if mood == 'Happy' %}
 😄 Happy
-{% elif entry[5] == 'Sad' %}
+{% elif mood == 'Sad' %}
 😢 Sad
-{% elif entry[5] == 'Angry' %}
+{% elif mood == 'Angry' %}
 😡 Angry
-{% elif entry[5] == 'Excited' %}
+{% elif mood == 'Excited' %}
 🤩 Excited
 {% else %}
 😐 Normal

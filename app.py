@@ -136,7 +136,13 @@ def view_entries():
         }
 
         for entry in entries:
-            mood = entry[5]
+            try:
+                mood = entry[5]
+            except:
+                mood = "Normal"
+            if not mood:
+                mood = "Normal"
+                
             if mood in mood_count:
                 mood_count[mood] += 1
 
@@ -146,8 +152,7 @@ def view_entries():
         return render_template("view.html", entries=entries, mood_count=mood_count)
 
     except Exception as e:
-        print("ERROR:", e)
-        return "Something went wrong"
+        return str(e)
     
 @app.route('/delete/<int:id>')
 def delete_entry(id):
