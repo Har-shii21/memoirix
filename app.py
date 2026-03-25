@@ -127,8 +127,8 @@ def view_entries():
         # 🔍 APPLY SEARCH
         if search_date:
             cursor.execute(
-                "SELECT * FROM entries WHERE user_id=%s AND date=%s",
-                (session['user_id'], search_date)
+                "SELECT * FROM entries WHERE user_id=%s AND date LIKE %s",
+                (session['user_id'], f"%{search_date}%")
             )
         else:
             cursor.execute(
