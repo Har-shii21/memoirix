@@ -142,14 +142,14 @@ def view_entries():
                 mood = "Normal"
             if not mood:
                 mood = "Normal"
-                
+
             if mood in mood_count:
                 mood_count[mood] += 1
 
         cursor.close()
         conn.close()
 
-        return render_template("view.html", entries=entries, mood_count=mood_count)
+        return render_template("view_entries.html", entries=entries, mood_count=mood_count)
 
     except Exception as e:
         return str(e)
